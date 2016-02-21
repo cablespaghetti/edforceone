@@ -42,13 +42,14 @@ def get_flight_data(flight_id, xml):
 
 
 def get_events(xml):
-    result = {}
+    result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None, "arrival_estimated": None}
     departures = xml.findall("{http://www.fixm.aero/flight/3.0}departure")
     arrivals = xml.findall("{http://www.fixm.aero/flight/3.0}arrival")
 
     if departures:
         for departure in departures:
             fix_time = departure.find("{http://www.fixm.aero/flight/3.0}departureFixTime")
+            dep_aerodrome = departure.find("{http://www.fixm.aero/flight/3.0}departureAerodrome")
             estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
             actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
@@ -62,15 +63,26 @@ def get_events(xml):
         for arrival in arrivals:
             fix_time = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalFixTime")
             estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
-            actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
+            #actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
-            if actual is not None:
-                result["arrival_actual"] = actual.get("timestamp")
+            #if actual is not None:
+            #    result["arrival_actual"] = actual.get("timestamp")
 
             if estimated is not None:
                 result["arrival_estimated"] = estimated.get("timestamp")
 
     return result
+
+
+def tweet(events, flight_name):
+    if events["arrival_actual"]:
+        print(flight_name + " has landed at XXXX.")
+    elif events["arrival_estimated"] and events["departure_actual"]:
+        print(flight_name + " departed from XXXX at " + events["departure_actual"] + ". It should arrive at XXXX at " +
+              events["arrival_estimated"]+ ".")
+    elif events["departure_estimated"]:
+        print(flight_name + " is scheduled to depart from XXXX at " + events["departure_estimated"] + ".")
+
 
 if __name__ == '__main__':
     airline = "BEE"
@@ -79,4 +91,4 @@ if __name__ == '__main__':
     flight_xml = get_flight_data(airline + flight, source_xml)
     if flight_xml is not None:
         event_dict = get_events(flight_xml)
-        print(event_dict)
+        tweet(event_dict, airline+flight)

@@ -88,14 +88,27 @@ def get_events(xml):
 
 def tweet(events, flight_name):
     if events["arrival_actual"]:
-        print(flight_name + " has landed in " + get_airport(events["arr_aerodrome"]) + ".")
+        message = flight_name + " has landed in " + get_airport(events["arr_aerodrome"]) + "."
     elif events["arrival_estimated"] and events["departure_actual"]:
-        print(flight_name + " departed from " + get_airport(events["dep_aerodrome"]) + " at " +
-              events["departure_actual"] + ". It should arrive in " + get_airport(events["arr_aerodrome"]) + " at " +
-              events["arrival_estimated"] + ".")
+        message = flight_name + " departed from " + get_airport(events["dep_aerodrome"]) + " at " + \
+                  events["departure_actual"] + ". It should arrive in " + get_airport(events["arr_aerodrome"]) + \
+                  " at " + events["arrival_estimated"] + "."
     elif events["departure_estimated"]:
-        print(flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " +
-              events["departure_estimated"] + ".")
+        message = flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " + \
+                  events["departure_estimated"] + "."
+
+    tweet_store = open("tweets.txt", "r")
+    for line in tweet_store:
+        if line == message:
+            print("Duplicate message. Bork.")
+            tweet_store.close()
+            return
+
+    tweet_store.close()
+    tweet_store = open("tweets.txt", "a")
+    tweet_store.write(message)
+    tweet_store.close()
+    print(message)
 
 
 def get_airport(icao):

@@ -2,6 +2,7 @@
 import urllib3
 import xml.etree.ElementTree as ElementTree
 import certifi
+import csv
 
 
 def get_source_xml(airline):
@@ -87,13 +88,27 @@ def get_events(xml):
 
 def tweet(events, flight_name):
     if events["arrival_actual"]:
-        print(flight_name + " has landed at " + events["arr_aerodrome"] + ".")
+        print(flight_name + " has landed in " + get_airport(events["arr_aerodrome"]) + ".")
     elif events["arrival_estimated"] and events["departure_actual"]:
-        print(flight_name + " departed from "+  events["dep_aerodrome"] + " at " + events["departure_actual"] +
-              ". It should arrive at " + events["arr_aerodrome"] + " at " + events["arrival_estimated"] + ".")
+        print(flight_name + " departed from " + get_airport(events["dep_aerodrome"]) + " at " +
+              events["departure_actual"] + ". It should arrive in " + get_airport(events["arr_aerodrome"]) + " at " +
+              events["arrival_estimated"] + ".")
     elif events["departure_estimated"]:
-        print(flight_name + " is scheduled to depart from " + events["dep_aerodrome"] + " at " +
+        print(flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " +
               events["departure_estimated"] + ".")
+
+
+def get_airport(icao):
+# Using http://openflights.org/data.html
+
+    with open('airports.dat', encoding="latin_1", errors="ignore") as csv_file:
+        reader = csv.DictReader(csv_file, fieldnames=["id", "name", "city", "country", "iata", "icao"])
+        for row in reader:
+            if row['icao'] == icao:
+                #if row['city'] not in row['name']:
+                #    return row['name'] + " (" + row['city'] + "), " + row['country'] + " (" + icao + ")"
+                #else:
+                    return row['city'] + ", " + row['country'] + " (" + icao + ")"
 
 
 if __name__ == '__main__':

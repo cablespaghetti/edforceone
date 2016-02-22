@@ -42,14 +42,15 @@ def get_flight_data(flight_id, xml):
 
 
 def get_events(xml):
-    result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None, "arrival_estimated": None}
+    result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None, "arrival_estimated": None,
+              "arr_aerodrome": None, "dep_aerodrome": None}
     departures = xml.findall("{http://www.fixm.aero/flight/3.0}departure")
     arrivals = xml.findall("{http://www.fixm.aero/flight/3.0}arrival")
 
     if departures:
         for departure in departures:
             fix_time = departure.find("{http://www.fixm.aero/flight/3.0}departureFixTime")
-            dep_aerodrome = departure.find("{http://www.fixm.aero/flight/3.0}departureAerodrome")
+            dep_aerodrome_element = departure.find("{http://www.fixm.aero/flight/3.0}departureAerodrome")
             estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
             actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
@@ -59,9 +60,14 @@ def get_events(xml):
             if estimated is not None:
                 result["departure_estimated"] = estimated.get("timestamp")
 
+            if dep_aerodrome_element is not None:
+                result["dep_aerodrome"] = dep_aerodrome_element.get("code")
+
     if arrivals:
         for arrival in arrivals:
             fix_time = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalFixTime")
+            arr_aerodrome_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodrome")
+            arr_aerodrome_orig_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodromeOriginal")
             estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
             #actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
@@ -71,22 +77,28 @@ def get_events(xml):
             if estimated is not None:
                 result["arrival_estimated"] = estimated.get("timestamp")
 
+            if arr_aerodrome_element is not None:
+                result["arr_aerodrome"] = arr_aerodrome_element.get("code")
+            elif arr_aerodrome_orig_element is not None:
+                result["arr_aerodrome"] = arr_aerodrome_orig_element.get("code")
+
     return result
 
 
 def tweet(events, flight_name):
     if events["arrival_actual"]:
-        print(flight_name + " has landed at XXXX.")
+        print(flight_name + " has landed at " + events["arr_aerodrome"] + ".")
     elif events["arrival_estimated"] and events["departure_actual"]:
-        print(flight_name + " departed from XXXX at " + events["departure_actual"] + ". It should arrive at XXXX at " +
-              events["arrival_estimated"]+ ".")
+        print(flight_name + " departed from "+  events["dep_aerodrome"] + " at " + events["departure_actual"] +
+              ". It should arrive at " + events["arr_aerodrome"] + " at " + events["arrival_estimated"] + ".")
     elif events["departure_estimated"]:
-        print(flight_name + " is scheduled to depart from XXXX at " + events["departure_estimated"] + ".")
+        print(flight_name + " is scheduled to depart from " + events["dep_aerodrome"] + " at " +
+              events["departure_estimated"] + ".")
 
 
 if __name__ == '__main__':
     airline = "BEE"
-    flight = "1534"
+    flight = "7051"
     source_xml = get_source_xml(airline)
     flight_xml = get_flight_data(airline + flight, source_xml)
     if flight_xml is not None:

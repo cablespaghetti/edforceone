@@ -1,0 +1,8 @@
+sudo yum update -y
+aws s3 cp s3://edforceone/run.py .
+aws s3 cp s3://edforceone/airports.dat .
+sudo yum install -y python34
+sudo yum install -y python34-pip
+sudo pip-3.4 install certifi urllib3
+python34 run.py
+

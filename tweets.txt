@@ -1,1 +1,2 @@
-BEE7051 departed from Birmingham, United Kingdom (EGBB) at 2016-02-22T19:25:00.000Z. It should arrive in Duesseldorf, Germany (EDDL) at 2016-02-22T20:50:00.000Z.
+
+BEE7051 is scheduled to depart from Birmingham, United Kingdom (EGBB) at 2016-02-28T19:35:00.000Z.

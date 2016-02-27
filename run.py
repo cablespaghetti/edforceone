@@ -33,7 +33,7 @@ def get_gufi(airline, flight):
     return None
 
 
-def get_source_xml(airline):
+def get_source_xml(gufi):
     """Calls the API to return the flight data for a specific Airline and return as a string
 
     Args:
@@ -48,8 +48,7 @@ def get_source_xml(airline):
         cert_reqs='CERT_REQUIRED', # Force certificate check.
         ca_certs=certifi.where(),  # Path to the Certifi bundle.
     )
-    r = http.request('GET', "https://api.laminardata.aero/v1/airlines/" + airline +
-                     "/flights?user_key=***REMOVED***")
+    r = http.request('GET', "https://api.laminardata.aero/v1/flights/" + gufi + "?user_key=***REMOVED***")
     if r.status == 200:
         xml_string = r.data.decode("utf-8")
     else:
@@ -57,22 +56,14 @@ def get_source_xml(airline):
     return xml_string
 
 
-def get_flight_data(flight_id, xml):
-    tree = ElementTree.ElementTree(ElementTree.fromstring(xml))
+def get_events(xml_string):
+    tree = ElementTree.ElementTree(ElementTree.fromstring(xml_string))
     ElementTree.register_namespace('fx', 'http://www.fixm.aero/flight/3.0')
     ElementTree.register_namespace('fb', 'http://www.fixm.aero/base/3.0')
-    root = tree.getroot()
-    flight_list = root.findall("{http://www.fixm.aero/flight/3.0}Flight")
+    xml = tree.getroot()
 
-    for flight_instance in flight_list:
-        flight_name = flight_instance.find("{http://www.fixm.aero/flight/3.0}flightIdentification").get("majorCarrierIdentifier")
-        if flight_name == flight_id:
-            return flight_instance
-
-
-def get_events(xml):
     result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None, "arrival_estimated": None,
-              "arr_aerodrome": None, "dep_aerodrome": None, "gufi": None}
+              "arr_aerodrome": None, "dep_aerodrome": None}
     departures = xml.findall("{http://www.fixm.aero/flight/3.0}departure")
     arrivals = xml.findall("{http://www.fixm.aero/flight/3.0}arrival")
 
@@ -115,7 +106,6 @@ def get_events(xml):
 
 
 def tweet(events, flight_name):
-    print(events["gufi"])
     if events["arrival_actual"]:
         message = flight_name + " has landed in " + get_airport(events["arr_aerodrome"]) + "."
     elif events["arrival_estimated"] and events["departure_actual"]:
@@ -156,9 +146,9 @@ def get_airport(icao):
 if __name__ == '__main__':
     airline = "BEE"
     flight = "7051"
-    print(get_gufi(airline, flight))
-    #source_xml = get_source_xml(airline)
-    #flight_xml = get_flight_data(airline + flight, source_xml)
-    #if flight_xml is not None:
-    #    event_dict = get_events(flight_xml)
-    #    tweet(event_dict, airline+flight)
+    gufi = get_gufi(airline, flight)
+    if gufi is not None:
+        source_xml = get_source_xml(gufi)
+    if source_xml is not None:
+        event_dict = get_events(source_xml)
+        tweet(event_dict, airline+flight)

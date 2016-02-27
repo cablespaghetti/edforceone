@@ -3,9 +3,34 @@ import urllib3
 import xml.etree.ElementTree as ElementTree
 import certifi
 import csv
+import os.path
+
+
+def check_stored_gufi():
+   gufi = None
+
+   if os.path.isfile("gufi.txt"):
+       print("Stored GUFI found")
+       gufi_store = open("gufi.txt", "r")
+       gufi = gufi_store.readline().rstrip()
+       gufi_store.close()
+   else:
+       return None
+
+   if get_source_xml(gufi) is not None:
+       print("Stored GUFI " + gufi + " still works.")
+       return gufi
+   else:
+       return None
 
 
 def get_gufi(airline, flight):
+    gufi = check_stored_gufi()
+
+    if gufi is not None:
+        return gufi
+
+    print("No working stored GUFI. Getting a fresh one.")
     http = urllib3.PoolManager(
         cert_reqs='CERT_REQUIRED', # Force certificate check.
         ca_certs=certifi.where(),  # Path to the Certifi bundle.
@@ -28,6 +53,9 @@ def get_gufi(airline, flight):
         flight_name = flight_instance.find("{http://www.fixm.aero/flight/3.0}flightIdentification").get("majorCarrierIdentifier")
         if flight_name == (airline + flight):
             gufi = flight_instance.find("{http://www.fixm.aero/flight/3.0}gufi").text
+            gufi_store = open("gufi.txt", "w")
+            gufi_store.write(gufi)
+            gufi_store.close()
             return gufi
 
     return None

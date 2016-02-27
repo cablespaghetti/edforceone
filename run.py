@@ -4,24 +4,32 @@ import xml.etree.ElementTree as ElementTree
 import certifi
 import csv
 import os.path
-
+import datetime
 
 def check_stored_gufi():
-   gufi = None
+    gufi = None
 
-   if os.path.isfile("gufi.txt"):
-       print("Stored GUFI found")
-       gufi_store = open("gufi.txt", "r")
-       gufi = gufi_store.readline().rstrip()
-       gufi_store.close()
-   else:
-       return None
+    if os.path.isfile("gufi.txt"):
+        print("Stored GUFI found")
+        gufi_store = open("gufi.txt", "r")
+        gufi = gufi_store.readline().rstrip()
+        gufi_store.close()
+    else:
+        return None
 
-   if get_source_xml(gufi) is not None:
-       print("Stored GUFI " + gufi + " still works.")
-       return gufi
-   else:
-       return None
+
+    source_xml = get_source_xml(gufi)
+    if source_xml is not None:
+        print("Stored GUFI " + gufi + " still works.")
+    else:
+        return None
+    an_hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
+    events_map = get_events(source_xml)
+    if (an_hour_ago > events_map["last_pos_time"]) and (an_hour_ago > events_map["arrival_estimated"]):
+        print("Stored GUFI hasn't had an update in an hour and flight was supposed to land an hour ago.")
+        return None
+    else:
+        return gufi
 
 
 def get_gufi(airline, flight):
@@ -81,9 +89,15 @@ def get_events(xml_string):
     xml = tree.getroot()
 
     result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None, "arrival_estimated": None,
-              "arr_aerodrome": None, "dep_aerodrome": None}
+              "arr_aerodrome": None, "dep_aerodrome": None, "last_pos_time": None}
     departures = xml.findall("{http://www.fixm.aero/flight/3.0}departure")
     arrivals = xml.findall("{http://www.fixm.aero/flight/3.0}arrival")
+    enroute = xml.find("{http://www.fixm.aero/flight/3.0}enRoute")
+
+    if enroute:
+        position_element = enroute.find("{http://www.fixm.aero/flight/3.0}position")
+        if position_element is not None:
+            result["last_pos_time"] = datetime.datetime.strptime(position_element.get("positionTime")[:-5], "%Y-%m-%dT%H:%M:%S")
 
     if departures:
         for departure in departures:
@@ -93,10 +107,10 @@ def get_events(xml_string):
             actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
             if actual is not None:
-                result["departure_actual"] = actual.get("timestamp")
+                result["departure_actual"] = datetime.datetime.strptime(actual.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
 
             if estimated is not None:
-                result["departure_estimated"] = estimated.get("timestamp")
+                result["departure_estimated"] = datetime.datetime.strptime(estimated.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
 
             if dep_aerodrome_element is not None:
                 result["dep_aerodrome"] = dep_aerodrome_element.get("code")
@@ -110,10 +124,10 @@ def get_events(xml_string):
             actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
             if actual is not None:
-                result["arrival_actual"] = actual.get("timestamp")
+                result["arrival_actual"] = datetime.datetime.strptime(actual.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
 
             if estimated is not None:
-                result["arrival_estimated"] = estimated.get("timestamp")
+                result["arrival_estimated"] = datetime.datetime.strptime(estimated.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
 
             if arr_aerodrome_element is not None:
                 result["arr_aerodrome"] = arr_aerodrome_element.get("code")
@@ -169,6 +183,8 @@ if __name__ == '__main__':
     gufi = get_gufi(airline, flight)
     if gufi is not None:
         source_xml = get_source_xml(gufi)
+    else:
+        exit(0)
     if source_xml is not None:
         event_dict = get_events(source_xml)
         tweet(event_dict, airline+flight)

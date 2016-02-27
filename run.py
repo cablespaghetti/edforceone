@@ -187,7 +187,7 @@ def get_airport(icao):
 
 
 if __name__ == '__main__':
-    airline = "BEE"
+    airline = "ABD"
     flight = "666"
     gufi = get_gufi(airline, flight)
     if gufi is not None:

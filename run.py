@@ -23,10 +23,12 @@ def check_stored_gufi():
         print("Stored GUFI " + gufi + " still works.")
     else:
         return None
+
     an_hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
     events_map = get_events(source_xml)
+
     if (an_hour_ago > events_map["last_pos_time"]) and (an_hour_ago > events_map["arrival_estimated"]):
-        print("Stored GUFI hasn't had an update in an hour and flight was supposed to land an hour ago.")
+        print("Stored GUFI hasn't had an update in an hour and flight was supposed to land an hour ago. Not using.")
         return None
     else:
         return gufi
@@ -57,16 +59,20 @@ def get_gufi(airline, flight):
     root = tree.getroot()
     flight_list = root.findall("{http://www.fixm.aero/flight/3.0}Flight")
 
+    most_recent_timestamp = None
+
     for flight_instance in flight_list:
         flight_name = flight_instance.find("{http://www.fixm.aero/flight/3.0}flightIdentification").get("majorCarrierIdentifier")
         if flight_name == (airline + flight):
-            gufi = flight_instance.find("{http://www.fixm.aero/flight/3.0}gufi").text
-            gufi_store = open("gufi.txt", "w")
-            gufi_store.write(gufi)
-            gufi_store.close()
-            return gufi
+            flight_timestamp = datetime.datetime.strptime(flight_instance.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
+            if (most_recent_timestamp is None) or (flight_timestamp > most_recent_timestamp):
+                most_recent_timestamp = flight_timestamp
+                gufi = flight_instance.find("{http://www.fixm.aero/flight/3.0}gufi").text
+                gufi_store = open("gufi.txt", "w")
+                gufi_store.write(gufi)
+                gufi_store.close()
 
-    return None
+    return gufi
 
 
 def get_source_xml(gufi):
@@ -179,7 +185,7 @@ def get_airport(icao):
 
 if __name__ == '__main__':
     airline = "BEE"
-    flight = "103"
+    flight = "7115"
     gufi = get_gufi(airline, flight)
     if gufi is not None:
         source_xml = get_source_xml(gufi)

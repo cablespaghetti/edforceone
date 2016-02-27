@@ -62,16 +62,6 @@ def get_gufi(airline, flight):
 
 
 def get_source_xml(gufi):
-    """Calls the API to return the flight data for a specific Airline and return as a string
-
-    Args:
-        airline (string): The airline to request the flight data for
-
-    Returns:
-        xml_string (string): The returned xml in a decoded string form
-
-    """
-
     http = urllib3.PoolManager(
         cert_reqs='CERT_REQUIRED', # Force certificate check.
         ca_certs=certifi.where(),  # Path to the Certifi bundle.
@@ -117,10 +107,10 @@ def get_events(xml_string):
             arr_aerodrome_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodrome")
             arr_aerodrome_orig_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodromeOriginal")
             estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
-            #actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
+            actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
-            #if actual is not None:
-            #    result["arrival_actual"] = actual.get("timestamp")
+            if actual is not None:
+                result["arrival_actual"] = actual.get("timestamp")
 
             if estimated is not None:
                 result["arrival_estimated"] = estimated.get("timestamp")
@@ -144,14 +134,16 @@ def tweet(events, flight_name):
         message = flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " + \
                   events["departure_estimated"] + "."
 
-    tweet_store = open("tweets.txt", "r")
-    for line in tweet_store:
-        if message in line:
-            print("Duplicate message. Bork.")
-            tweet_store.close()
-            return
+    if os.path.isfile("tweets.txt"):
+        tweet_store = open("tweets.txt", "r")
+        for line in tweet_store:
+            if message in line:
+                print("Duplicate message. Bork.")
+                tweet_store.close()
+                return
+            else:
+                tweet_store.close()
 
-    tweet_store.close()
     tweet_store = open("tweets.txt", "a")
     tweet_store.write(message + "\n")
     tweet_store.close()
@@ -173,7 +165,7 @@ def get_airport(icao):
 
 if __name__ == '__main__':
     airline = "BEE"
-    flight = "7051"
+    flight = "103"
     gufi = get_gufi(airline, flight)
     if gufi is not None:
         source_xml = get_source_xml(gufi)

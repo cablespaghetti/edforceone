@@ -99,14 +99,14 @@ def tweet(events, flight_name):
 
     tweet_store = open("tweets.txt", "r")
     for line in tweet_store:
-        if line == message:
+        if message in line:
             print("Duplicate message. Bork.")
             tweet_store.close()
             return
 
     tweet_store.close()
     tweet_store = open("tweets.txt", "a")
-    tweet_store.write(message)
+    tweet_store.write(message + "\n")
     tweet_store.close()
     print(message)
 

@@ -5,6 +5,8 @@ import certifi
 import csv
 import os.path
 import datetime
+from twython import Twython
+
 
 def check_stored_gufi():
     gufi = None
@@ -172,6 +174,13 @@ def tweet(events, flight_name):
     tweet_store.close()
     print(message)
 
+    APP_KEY = '***REMOVED***'
+    APP_SECRET = '***REMOVED***'
+    OAUTH_TOKEN = '***REMOVED***'
+    OAUTH_TOKEN_SECRET = '***REMOVED***'
+    twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    twitter.update_status(status=message)
+
 
 def get_airport(icao):
 # Using http://openflights.org/data.html
@@ -181,9 +190,9 @@ def get_airport(icao):
         for row in reader:
             if row['icao'] == icao:
                 #if row['city'] not in row['name']:
-                #    return row['name'] + " (" + row['city'] + "), " + row['country'] + " (" + icao + ")"
+                return row['name'] + " (" + row['city'] + "), " + row['country'] + " (" + icao + ")"
                 #else:
-                    return row['city'] + ", " + row['country'] + " (" + icao + ")"
+                #    return row['city'] + ", " + row['country'] + " (" + icao + ")"
 
 
 if __name__ == '__main__':

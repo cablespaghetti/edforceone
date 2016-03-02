@@ -153,11 +153,11 @@ def tweet(events, flight_name):
         message = flight_name + " has landed in " + get_airport(events["arr_aerodrome"]) + "."
     elif events["arrival_estimated"] and events["departure_actual"]:
         message = flight_name + " departed from " + get_airport(events["dep_aerodrome"]) + " at " + \
-                  datetime.datetime.strftime(events["departure_actual"], "%c") + ". It should arrive in " + get_airport(events["arr_aerodrome"]) + \
-                  " at " + datetime.datetime.strftime(events["arrival_estimated"], "%c") + "."
+                  datetime.datetime.strftime(events["departure_actual"], "%H:%M:%S") + " UTC. It should arrive in " + get_airport(events["arr_aerodrome"]) + \
+                  " at " + datetime.datetime.strftime(events["arrival_estimated"], "%H:%M:%S") + " UTC."
     elif events["departure_estimated"]:
         message = flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " + \
-                  datetime.datetime.strftime(events["departure_estimated"], "%c") + "."
+                  datetime.datetime.strftime(events["departure_estimated"], "%H:%M:%S") + " UTC."
 
     if os.path.isfile("tweets.txt"):
         tweet_store = open("tweets.txt", "r")
@@ -180,7 +180,7 @@ def tweet(events, flight_name):
     OAUTH_TOKEN_SECRET = '***REMOVED***'
     twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
     twitter.update_status(status=message)
-
+    print(len(message))
 
 def get_airport(icao):
 # Using http://openflights.org/data.html
@@ -189,11 +189,13 @@ def get_airport(icao):
         reader = csv.DictReader(csv_file, fieldnames=["id", "name", "city", "country", "iata", "icao"])
         for row in reader:
             if row['icao'] == icao:
-                #if row['city'] not in row['name']:
-                return row['name'] + " (" + row['city'] + "), " + row['country'] + " (" + icao + ")"
-                #else:
-                #    return row['city'] + ", " + row['country'] + " (" + icao + ")"
+                preferred_name = row['name'] + " (" + row['city'] + "), " + row['country'] + " (" + icao + ")"
+                if len(preferred_name) > 30:
+                    preferred_name = row['city'] + ", " + row['country'] + " (" + icao + ")"
+                    if len(preferred_name) > 30:
+                        preferred_name = row['city'] + " (" + icao + ")"
 
+                return preferred_name
 
 if __name__ == '__main__':
     airline = "ABD"

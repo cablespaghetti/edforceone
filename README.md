@@ -18,3 +18,15 @@ Usage
 ```
 python3 run.py --laminar_key xxxx --twitter_app_key xxxx --twitter_app_secret xxxx --twitter_oauth_token xxxx --twitter_oauth_secret xxxx
 ```
+
+TODO
+====
+Must
+----
+* Make sure we don't tweet more than once when data changes (e.g. take offs)
+* #EdForceOne hashtag on messages for greater exposure
+
+Should
+------
+* Use Laminar's aerodromes API instead of dat file
+* Use something more sophisticated for message history persistence

@@ -8,27 +8,6 @@ import datetime
 from twython import Twython
 import argparse
 
-# Process the CLI arguments.
-parser = argparse.ArgumentParser()
-parser.add_argument('--laminar_key', help='A Laminar Data User Key')
-parser.add_argument('--twitter_app_key', help='A twitter app key')
-parser.add_argument('--twitter_app_secret', help='The secret for your twitter app key')
-parser.add_argument('--twitter_oauth_token', help='A twitter oauth 2 token')
-parser.add_argument('--twitter_oauth_secret', help='The secret for your twitter oauth 2 token')
-
-args = parser.parse_args()
-
-laminar_key = args.laminar_key
-app_key = args.twitter_app_key
-app_secret = args.twitter_app_secret
-oauth_token = args.twitter_oauth_token
-oauth_secret = args.twitter_oauth_secret
-
-if (not laminar_key) or (not app_key) or (not app_secret) or (not oauth_token) or (not oauth_secret):
-    print("Error: Required parameter not set. Please use --help.")
-    exit(1)
-
-
 def check_stored_gufi():
     if os.path.isfile("gufi.txt"):
         print("Stored GUFI found")
@@ -223,6 +202,26 @@ def get_airport(icao):
 
 
 if __name__ == '__main__':
+    # Process the CLI arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--laminar_key', help='A Laminar Data User Key')
+    parser.add_argument('--twitter_app_key', help='A twitter app key')
+    parser.add_argument('--twitter_app_secret', help='The secret for your twitter app key')
+    parser.add_argument('--twitter_oauth_token', help='A twitter oauth 2 token')
+    parser.add_argument('--twitter_oauth_secret', help='The secret for your twitter oauth 2 token')
+
+    args = parser.parse_args()
+
+    laminar_key = args.laminar_key
+    app_key = args.twitter_app_key
+    app_secret = args.twitter_app_secret
+    oauth_token = args.twitter_oauth_token
+    oauth_secret = args.twitter_oauth_secret
+
+    if (not laminar_key) or (not app_key) or (not app_secret) or (not oauth_token) or (not oauth_secret):
+        print("Error: Required parameter not set. Please use --help.")
+        exit(1)
+
     airline = "ABD"
     flight = "666"
     gufi = get_gufi(airline, flight)

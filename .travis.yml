@@ -2,4 +2,4 @@ language: python
 python:
   - "3.5"
 # command to run tests
-script: python tests/test.py
+script: python -m unittest test.test -v

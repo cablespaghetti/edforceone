@@ -1,4 +1,4 @@
-Ed Force One [![Build Status](https://travis-ci.org/cablespaghetti/edforceone.svg?branch=master)](https://travis-ci.org/cablespaghetti/edforceone)
+Ed Force One [![Build Status](https://travis-ci.org/cablespaghetti/edforceone.svg?branch=develop)](https://travis-ci.org/cablespaghetti/edforceone)
 ============
 
 A simple app that uses the [Laminar Data](https://developer.laminardata.aero) API to post to [a Twitter feed](https://twitter.com/edforceupdates) about the locations of Iron Maiden's tour plane.

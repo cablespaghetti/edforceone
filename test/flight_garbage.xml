@@ -1,0 +1,40 @@
+<!--
+ Created by Laminar Data (https://laminardata.aero/). 
+-->
+<fx:Flight xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fb="http://www.fixm.aero/base/3.0" xmlns:ff="http://www.fixm.aero/foundation/3.0" xmlns:fx="http://www.fixm.aero/flight/3.0" xmlns:message="http://schemas.laminardata.aero/fixm/extension/message/1.0" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance xsi.xsd http://www.fixm.aero/fixm/3.0 fixm/3.0.1_GP_Edit/core/Fixm.xsd http://schemas.laminardata.aero/fixm/extension/message/1.0 fixm/3.0.1_GP_Edit/extensions/laminardata/FlightMessage.xsd">
+<fx:agreed>
+<fx:route>
+<fx:initialCruisingSpeed uom="KNOTS">233</fx:initialCruisingSpeed>
+</fx:route>
+</fx:agreed>
+<fx:aircraftDescription wakeTurbulence="M">
+<fx:aircraftType>
+<fx:icaoModelIdentifier>DH8D</fx:icaoModelIdentifier>
+</fx:aircraftType>
+</fx:aircraftDescription>
+<fx:arrival>
+<fx:arrivalAerodromeOriginal xsi:type="fb:IcaoAerodromeReferenceType" code="EGAC"/>
+<fx:arrivalFixTime>
+<fb:estimated timestamp="2016-04-15T13:06:34.000Z"/>
+</fx:arrivalFixTime>
+</fx:arrival>
+<fx:departure>
+<fx:departureAerodrome xsi:type="fb:IcaoAerodromeReferenceType" code="EGFF"/>
+<fx:departureFixTime>
+<fb:actual timestamp="2016-04-15T11:55:00.000Z"/>
+<fb:estimated timestamp="2016-04-15T12:11:34.000Z"/>
+</fx:departureFixTime>
+</fx:departure>
+<fx:enRoute>
+<fx:position positionTime="2016-04-15T13:01:51.000Z">
+<fx:actualSpeed>
+<fx:surveillance uom="KNOTS">174.000000</fx:surveillance>
+</fx:actualSpeed>
+<fx:altitude uom="FEET" ref="MEAN_SEA_LEVEL">3300</fx:altitude>
+<fx:position xsi:type="fb:LocationPointType">
+<fb:location srsName="urn:ogc:def:crs:EPSG::4326">
+<ff:pos>54.466300 -6.044100</ff:pos>
+</fb:location>
+</fx:position>
+<fx:track uom="DEGREES">20.000000</fx:track>
+</fx:position>

@@ -28,7 +28,7 @@ def check_stored_gufi():
     return stored_gufi
 
 
-def get_gufi(gufi_airline, gufi_flight):
+def get_gufi(gufi_airline, gufi_flight, laminar_key):
     current_gufi = check_stored_gufi()
 
     if current_gufi is not None:
@@ -84,65 +84,70 @@ def get_source_xml(flight_gufi):
 
 
 def get_events(xml_string):
-    tree = ElementTree.ElementTree(ElementTree.fromstring(xml_string))
-    ElementTree.register_namespace('fx', 'http://www.fixm.aero/flight/3.0')
-    ElementTree.register_namespace('fb', 'http://www.fixm.aero/base/3.0')
-    xml = tree.getroot()
+    try:
+        result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None,
+                  "arrival_estimated": None,
+                  "arr_aerodrome": None, "dep_aerodrome": None, "last_pos_time": None}
+        tree = ElementTree.ElementTree(ElementTree.fromstring(xml_string))
+        ElementTree.register_namespace('fx', 'http://www.fixm.aero/flight/3.0')
+        ElementTree.register_namespace('fb', 'http://www.fixm.aero/base/3.0')
+        xml = tree.getroot()
 
-    result = {"departure_actual": None, "departure_estimated": None, "arrival_actual": None, "arrival_estimated": None,
-              "arr_aerodrome": None, "dep_aerodrome": None, "last_pos_time": None}
-    departures = xml.findall("{http://www.fixm.aero/flight/3.0}departure")
-    arrivals = xml.findall("{http://www.fixm.aero/flight/3.0}arrival")
-    enroute = xml.find("{http://www.fixm.aero/flight/3.0}enRoute")
 
-    if enroute:
-        position_element = enroute.find("{http://www.fixm.aero/flight/3.0}position")
-        if position_element is not None:
-            result["last_pos_time"] = datetime.datetime.strptime(position_element.get("positionTime")[:-5],
-                                                                 "%Y-%m-%dT%H:%M:%S")
+        departures = xml.findall("{http://www.fixm.aero/flight/3.0}departure")
+        arrivals = xml.findall("{http://www.fixm.aero/flight/3.0}arrival")
+        enroute = xml.find("{http://www.fixm.aero/flight/3.0}enRoute")
 
-    if departures:
-        for departure in departures:
-            fix_time = departure.find("{http://www.fixm.aero/flight/3.0}departureFixTime")
-            dep_aerodrome_element = departure.find("{http://www.fixm.aero/flight/3.0}departureAerodrome")
-            estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
-            actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
+        if enroute:
+            position_element = enroute.find("{http://www.fixm.aero/flight/3.0}position")
+            if position_element is not None:
+                result["last_pos_time"] = datetime.datetime.strptime(position_element.get("positionTime")[:-5],
+                                                                     "%Y-%m-%dT%H:%M:%S")
 
-            if actual is not None:
-                result["departure_actual"] = datetime.datetime.strptime(actual.get("timestamp")[:-5],
-                                                                        "%Y-%m-%dT%H:%M:%S")
+        if departures:
+            for departure in departures:
+                fix_time = departure.find("{http://www.fixm.aero/flight/3.0}departureFixTime")
+                dep_aerodrome_element = departure.find("{http://www.fixm.aero/flight/3.0}departureAerodrome")
+                estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
+                actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
-            if estimated is not None:
-                result["departure_estimated"] = datetime.datetime.strptime(estimated.get("timestamp")[:-5],
-                                                                           "%Y-%m-%dT%H:%M:%S")
+                if actual is not None:
+                    result["departure_actual"] = datetime.datetime.strptime(actual.get("timestamp")[:-5],
+                                                                            "%Y-%m-%dT%H:%M:%S")
 
-            if dep_aerodrome_element is not None:
-                result["dep_aerodrome"] = dep_aerodrome_element.get("code")
+                if estimated is not None:
+                    result["departure_estimated"] = datetime.datetime.strptime(estimated.get("timestamp")[:-5],
+                                                                               "%Y-%m-%dT%H:%M:%S")
 
-    if arrivals:
-        for arrival in arrivals:
-            fix_time = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalFixTime")
-            arr_aerodrome_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodrome")
-            arr_aerodrome_orig_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodromeOriginal")
-            estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
-            actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
+                if dep_aerodrome_element is not None:
+                    result["dep_aerodrome"] = dep_aerodrome_element.get("code")
 
-            if actual is not None:
-                result["arrival_actual"] = datetime.datetime.strptime(actual.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
+        if arrivals:
+            for arrival in arrivals:
+                fix_time = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalFixTime")
+                arr_aerodrome_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodrome")
+                arr_aerodrome_orig_element = arrival.find("{http://www.fixm.aero/flight/3.0}arrivalAerodromeOriginal")
+                estimated = fix_time.find("{http://www.fixm.aero/base/3.0}estimated")
+                actual = fix_time.find("{http://www.fixm.aero/base/3.0}actual")
 
-            if estimated is not None:
-                result["arrival_estimated"] = datetime.datetime.strptime(estimated.get("timestamp")[:-5],
-                                                                         "%Y-%m-%dT%H:%M:%S")
+                if actual is not None:
+                    result["arrival_actual"] = datetime.datetime.strptime(actual.get("timestamp")[:-5], "%Y-%m-%dT%H:%M:%S")
 
-            if arr_aerodrome_element is not None:
-                result["arr_aerodrome"] = arr_aerodrome_element.get("code")
-            elif arr_aerodrome_orig_element is not None:
-                result["arr_aerodrome"] = arr_aerodrome_orig_element.get("code")
+                if estimated is not None:
+                    result["arrival_estimated"] = datetime.datetime.strptime(estimated.get("timestamp")[:-5],
+                                                                             "%Y-%m-%dT%H:%M:%S")
+
+                if arr_aerodrome_element is not None:
+                    result["arr_aerodrome"] = arr_aerodrome_element.get("code")
+                elif arr_aerodrome_orig_element is not None:
+                    result["arr_aerodrome"] = arr_aerodrome_orig_element.get("code")
+    except Exception:
+        print("Error: Something bad happened")
 
     return result
 
 
-def tweet(events, flight_name):
+def tweet(events, flight_name, tweet=False):
     message = None
 
     if events["arrival_actual"]:
@@ -157,13 +162,14 @@ def tweet(events, flight_name):
         message = flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " + \
                   datetime.datetime.strftime(events["departure_estimated"], "%H:%M:%S") + " UTC."
 
+
     if os.path.isfile("tweets.txt") and message:
         tweet_store = open("tweets.txt", "r")
         for line in tweet_store:
             if message in line:
                 print("Duplicate message. Bork.")
                 tweet_store.close()
-                return
+                return "Duplicate"
 
         tweet_store.close()
 
@@ -172,15 +178,17 @@ def tweet(events, flight_name):
     tweet_store.close()
     print(message)
 
-    twitter = Twython(app_key, app_secret, oauth_token, oauth_secret)
-    twitter.update_status(status=message)
-    print(len(message))
+    if tweet is True:
+        twitter = Twython(app_key, app_secret, oauth_token, oauth_secret)
+        twitter.update_status(status=message)
+        print(len(message))
 
+    return message
 
 def get_airport(icao):
     # Using http://openflights.org/data.html
 
-    with open('airports.dat', encoding="latin_1", errors="ignore") as csv_file:
+    with open('edforceone/airports.dat', encoding="latin_1", errors="ignore") as csv_file:
         reader = csv.DictReader(csv_file, fieldnames=["id", "name", "city", "country", "iata", "icao"])
         for row in reader:
             if row['icao'] == icao:
@@ -201,6 +209,7 @@ if __name__ == '__main__':
     parser.add_argument('--twitter_app_secret', help='The secret for your twitter app key')
     parser.add_argument('--twitter_oauth_token', help='A twitter oauth 2 token')
     parser.add_argument('--twitter_oauth_secret', help='The secret for your twitter oauth 2 token')
+    parser.add_argument('--tweet', help='Set to True if you want to tweet')
 
     args = parser.parse_args()
 
@@ -209,6 +218,10 @@ if __name__ == '__main__':
     app_secret = args.twitter_app_secret
     oauth_token = args.twitter_oauth_token
     oauth_secret = args.twitter_oauth_secret
+    if args.tweet == "True":
+        args_tweet = True
+    else:
+        args_tweet = False
 
     if (not laminar_key) or (not app_key) or (not app_secret) or (not oauth_token) or (not oauth_secret):
         print("Error: Required parameter not set. Please use --help.")
@@ -216,7 +229,7 @@ if __name__ == '__main__':
 
     airline = "ABD"
     flight = "666"
-    gufi = get_gufi(airline, flight)
+    gufi = get_gufi(airline, flight, laminar_key)
     source_xml = None
 
     if gufi is not None:
@@ -224,4 +237,4 @@ if __name__ == '__main__':
 
     if source_xml:
         event_dict = get_events(source_xml)
-        tweet(event_dict, airline + flight)
+        tweet(event_dict, airline + flight, args_tweet)

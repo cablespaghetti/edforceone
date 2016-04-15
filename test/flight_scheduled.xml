@@ -1,0 +1,30 @@
+<!--
+ Created by Laminar Data (https://laminardata.aero/). 
+-->
+<fx:Flight xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fb="http://www.fixm.aero/base/3.0" xmlns:ff="http://www.fixm.aero/foundation/3.0" xmlns:fx="http://www.fixm.aero/flight/3.0" xmlns:message="http://schemas.laminardata.aero/fixm/extension/message/1.0" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance xsi.xsd http://www.fixm.aero/fixm/3.0 fixm/3.0.1_GP_Edit/core/Fixm.xsd http://schemas.laminardata.aero/fixm/extension/message/1.0 fixm/3.0.1_GP_Edit/extensions/laminardata/FlightMessage.xsd">
+<fx:agreed>
+<fx:route>
+<fx:initialCruisingSpeed uom="KNOTS">231</fx:initialCruisingSpeed>
+</fx:route>
+</fx:agreed>
+<fx:aircraftDescription wakeTurbulence="M">
+<fx:aircraftType>
+<fx:icaoModelIdentifier>DH8D</fx:icaoModelIdentifier>
+</fx:aircraftType>
+</fx:aircraftDescription>
+<fx:arrival>
+<fx:arrivalAerodrome xsi:type="fb:IcaoAerodromeReferenceType" code="EGCC"/>
+<fx:arrivalFixTime>
+<fb:estimated timestamp="2016-04-17T18:30:00.000Z"/>
+</fx:arrivalFixTime>
+</fx:arrival>
+<fx:departure>
+<fx:departureAerodrome xsi:type="fb:IcaoAerodromeReferenceType" code="EGPD"/>
+<fx:departureFixTime>
+<fb:estimated timestamp="2016-04-17T17:30:00.000Z"/>
+</fx:departureFixTime>
+</fx:departure>
+<fx:flightIdentification majorCarrierIdentifier="BEE1044"/>
+<fx:flightStatus flightCycle="SCHEDULED"/>
+<fx:gufi codeSpace="urn:uuid">1c2a57bd-61f6-467b-baf5-2356d8d5544a</fx:gufi>
+</fx:Flight>

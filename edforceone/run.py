@@ -162,6 +162,7 @@ def tweet(events, flight_name, tweet=False):
         message = flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " + \
                   datetime.datetime.strftime(events["departure_estimated"], "%H:%M:%S") + " UTC."
 
+    message += " #EdForceOne"
 
     if os.path.isfile("tweets.txt") and message:
         tweet_store = open("tweets.txt", "r")
@@ -193,10 +194,14 @@ def get_airport(icao):
         for row in reader:
             if row['icao'] == icao:
                 preferred_name = row['name'] + " (" + row['city'] + "), " + row['country'] + " (" + icao + ")"
-                if len(preferred_name) > 30:
+                if len(preferred_name) > 18:
                     preferred_name = row['city'] + ", " + row['country'] + " (" + icao + ")"
-                    if len(preferred_name) > 30:
+                    if len(preferred_name) > 18:
                         preferred_name = row['city'] + " (" + icao + ")"
+                        if len(preferred_name) > 18:
+                            preferred_name = row['city']
+                            if len(preferred_name) > 18:
+                                preferred_name = icao
 
                 return preferred_name
 

@@ -7,6 +7,8 @@ import os.path
 import datetime
 from twython import Twython
 import argparse
+import calendar
+import time
 
 def check_stored_gufi():
     # Read
@@ -149,33 +151,44 @@ def get_events(xml_string):
 
 def tweet(events, flight_name, tweet=False):
     message = None
+    flight_state = None
 
     if events["arrival_actual"]:
         message = flight_name + " has landed in " + get_airport(events["arr_aerodrome"]) + "."
+        flight_state = "landed"
     elif events["arrival_estimated"] and events["departure_actual"]:
         message = flight_name + " departed from " + get_airport(events["dep_aerodrome"]) + " at " + \
                   datetime.datetime.strftime(events["departure_actual"],
                                              "%H:%M:%S") + " UTC. It should arrive in " + get_airport(
             events["arr_aerodrome"]) + \
                   " at " + datetime.datetime.strftime(events["arrival_estimated"], "%H:%M:%S") + " UTC."
+        flight_state = "airborne"
     elif events["departure_estimated"]:
         message = flight_name + " is scheduled to depart from " + get_airport(events["dep_aerodrome"]) + " at " + \
                   datetime.datetime.strftime(events["departure_estimated"], "%H:%M:%S") + " UTC."
+        flight_state = "scheduled"
 
     message += " #EdForceOne"
+
+    if not flight_state:
+        print("No valid flight state. Something has gone wrong.")
+        return None
 
     if os.path.isfile("tweets.txt") and message:
         tweet_store = open("tweets.txt", "r")
         for line in tweet_store:
-            if message in line:
-                print("Duplicate message. Bork.")
-                tweet_store.close()
-                return "Duplicate"
+            if len(line) > 10:
+                if int(line[:10]) > (calendar.timegm(time.gmtime()) - 86400):
+                    if (events["dep_aerodrome"] in line) and (flight_state in line):
+                        print("Duplicate message. Bork.")
+                        tweet_store.close()
+                        return "Duplicate"
 
         tweet_store.close()
 
     tweet_store = open("tweets.txt", "a")
-    tweet_store.write(message + "\n")
+    current_epoch = calendar.timegm(time.gmtime())
+    tweet_store.write(str(current_epoch) + " " + events["dep_aerodrome"] + " " + flight_state + "\n")
     tweet_store.close()
     print(message)
 

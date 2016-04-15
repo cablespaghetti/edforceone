@@ -9,6 +9,7 @@ from twython import Twython
 import argparse
 
 def check_stored_gufi():
+    # Read
     if os.path.isfile("gufi.txt"):
         print("Stored GUFI found")
         gufi_store = open("gufi.txt", "r")
@@ -24,16 +25,7 @@ def check_stored_gufi():
         os.remove("gufi.txt")
         return None
 
-    an_hour_ago = datetime.datetime.now() - datetime.timedelta(hours=1)
-    events_map = get_events(gufi_xml)
-    if events_map["last_pos_time"] is None:
-        return stored_gufi
-    elif (an_hour_ago > events_map["last_pos_time"]) and (an_hour_ago > events_map["arrival_estimated"]):
-        print("Stored GUFI hasn't had an update in an hour and flight was supposed to land an hour ago. Not using.")
-        os.remove("gufi.txt")
-        return None
-    else:
-        return stored_gufi
+    return stored_gufi
 
 
 def get_gufi(gufi_airline, gufi_flight):

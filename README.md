@@ -30,3 +30,7 @@ Should
 ------
 * Use Laminar's aerodromes API instead of dat file
 * Use something more sophisticated for message history persistence
+
+Could
+-----
+* Get the app to tweet an arrival when laminar doesn't get one

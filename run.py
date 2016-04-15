@@ -6,7 +6,27 @@ import csv
 import os.path
 import datetime
 from twython import Twython
+import argparse
 
+# Process the CLI arguments.
+parser = argparse.ArgumentParser()
+parser.add_argument('--laminar_key', help='A Laminar Data User Key')
+parser.add_argument('--twitter_app_key', help='A twitter app key')
+parser.add_argument('--twitter_app_secret', help='The secret for your twitter app key')
+parser.add_argument('--twitter_oauth_token', help='A twitter oauth 2 token')
+parser.add_argument('--twitter_oauth_secret', help='The secret for your twitter oauth 2 token')
+
+args = parser.parse_args()
+
+laminar_key = args.laminar_key
+app_key = args.twitter_app_key
+app_secret = args.twitter_app_secret
+oauth_token = args.twitter_oauth_token
+oauth_secret = args.twitter_oauth_secret
+
+if (not laminar_key) or (not app_key) or (not app_secret) or (not oauth_token) or (not oauth_secret):
+    print("Error: Required parameter not set. Please use --help.")
+    exit(1)
 
 def check_stored_gufi():
     gufi = None
@@ -51,7 +71,7 @@ def get_gufi(airline, flight):
         ca_certs=certifi.where(),  # Path to the Certifi bundle.
     )
     r = http.request('GET', "https://api.laminardata.aero/v1/airlines/" + airline +
-                     "/flights?user_key=***REMOVED***")
+                     "/flights?user_key=" + laminar_key)
     if r.status == 200:
         xml_string = r.data.decode("utf-8")
     else:
@@ -85,7 +105,7 @@ def get_source_xml(gufi):
         cert_reqs='CERT_REQUIRED', # Force certificate check.
         ca_certs=certifi.where(),  # Path to the Certifi bundle.
     )
-    r = http.request('GET', "https://api.laminardata.aero/v1/flights/" + gufi + "?user_key=***REMOVED***")
+    r = http.request('GET', "https://api.laminardata.aero/v1/flights/" + gufi + "?user_key=" + laminar_key)
     if r.status == 200:
         xml_string = r.data.decode("utf-8")
     else:
@@ -174,11 +194,7 @@ def tweet(events, flight_name):
     tweet_store.close()
     print(message)
 
-    APP_KEY = '***REMOVED***'
-    APP_SECRET = '***REMOVED***'
-    OAUTH_TOKEN = '***REMOVED***'
-    OAUTH_TOKEN_SECRET = '***REMOVED***'
-    twitter = Twython(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    twitter = Twython(app_key, app_secret, oauth_token, oauth_token_secret)
     twitter.update_status(status=message)
     print(len(message))
 

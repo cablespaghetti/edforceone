@@ -66,7 +66,7 @@ def get_gufi(gufi_airline, gufi_flight, laminar_key):
                 most_recent_timestamp = flight_timestamp
                 current_gufi = flight_instance.find("{http://www.fixm.aero/flight/3.0}gufi").text
                 gufi_store = open("gufi.txt", "w")
-                gufi_store.write(gufi)
+                gufi_store.write(current_gufi)
                 gufi_store.close()
 
     return current_gufi

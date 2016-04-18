@@ -6,8 +6,6 @@ A simple app that uses the [Laminar Data](https://developer.laminardata.aero) AP
 Requirements
 ============
 
-Slumber requires the following modules.
-
 * Python 3.5+ (although it may run on older)
 * certifi
 * urllib3
@@ -16,15 +14,13 @@ Slumber requires the following modules.
 Usage
 =====
 ```
-python3 run.py --laminar_key xxxx --twitter_app_key xxxx --twitter_app_secret xxxx --twitter_oauth_token xxxx --twitter_oauth_secret xxxx
+python3 run.py --laminar_key xxxx --twitter_app_key xxxx --twitter_app_secret xxxx --twitter_oauth_token xxxx --twitter_oauth_secret xxxx --tweet True
 ```
+
+The tweet argument is optional and if not included it will just print out the tweets to the command line and log file.
 
 TODO
 ====
-Must
-----
-* Make sure we don't tweet more than once when data changes (e.g. take offs)
-* #EdForceOne hashtag on messages for greater exposure
 
 Should
 ------
